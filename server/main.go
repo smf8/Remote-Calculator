@@ -9,6 +9,13 @@ import (
 	"strings"
 )
 
+type client struct {
+	conn   net.Conn
+	writer *bufio.Writer
+	reader *bufio.Reader
+	income chan string
+}
+
 func main() {
 	server, err := net.Listen("tcp", ":1234")
 	if err != nil {
@@ -21,35 +28,22 @@ func main() {
 		if err != nil {
 			log.Fatal(err, "on client connection")
 		}
-		// conn is a net.Conn instance and we need to keep track of it's writer and reader inside another go routine
-		// as net.Conn already implements Reader and Writer interfaces we use a bufio.Reader/Writer
-		r := bufio.NewReader(conn)
-		wr := bufio.NewWriter(conn)
+		// a client is connected successfully, creating a client type for it
+		c := client{
+			conn:   conn,
+			writer: bufio.NewWriter(conn),
+			reader: bufio.NewReader(conn),
+			income: make(chan string),
+		}
+		// run listen in a indefinite go routine
+		go listen(&c)
 
-		// server must assign a new go routine for each client incoming messages
-		go func() {
-			for {
-				// get string input from client
-				m, err := r.ReadString('\n')
-				if err != nil {
-					log.Fatal(err, "on input messages")
-				}
-				// handling input
-				b := calculate(m)
-				switch b.(type) {
-				case int:
-					wr.WriteString(strconv.Itoa(b.(int)) + "\n")
-					wr.Flush()
-				case float64:
-					wr.WriteString(fmt.Sprintf("%.2f", b.(float64)) + "\n")
-					wr.Flush()
-				}
-				fmt.Println(b)
-			}
-		}()
+		// run respond indefinitely on another go routine
+		go c.respond()
 	}
 }
 
+// function to calculate a problem
 func calculate(s string) interface{} {
 	var firstOperator, secondOperator int
 	if strings.Contains(s, "-") {
@@ -83,4 +77,34 @@ func calculate(s string) interface{} {
 		return firstOperator % secondOperator
 	}
 	return nil
+}
+
+// responding to incoming problems with their answer
+func (c *client) respond() {
+	for {
+		s := <-c.income
+		// message received, let's the answer back to client
+		b := calculate(s)
+		switch b.(type) {
+		case int:
+			c.writer.WriteString(strconv.Itoa(b.(int)) + "\n")
+			c.writer.Flush()
+		case float64:
+			c.writer.WriteString(fmt.Sprintf("%.2f", b.(float64)) + "\n")
+			c.writer.Flush()
+		}
+		fmt.Println(b)
+	}
+}
+
+func listen(c *client) {
+	for {
+		// get string input from client
+		m, err := c.reader.ReadString('\n')
+		if err != nil {
+			log.Fatal(err, "on input messages")
+		}
+		// no error, sending message to income channel
+		c.income <- m
+	}
 }

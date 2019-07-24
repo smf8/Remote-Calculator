@@ -10,10 +10,11 @@ import (
 )
 
 type client struct {
-	conn   net.Conn
-	writer *bufio.Writer
-	reader *bufio.Reader
-	income chan string
+	conn       net.Conn
+	writer     *bufio.Writer
+	reader     *bufio.Reader
+	income     chan string
+	disconnect chan string
 }
 
 func main() {
@@ -82,18 +83,23 @@ func calculate(s string) interface{} {
 // responding to incoming problems with their answer
 func (c *client) respond() {
 	for {
-		s := <-c.income
-		// message received, let's the answer back to client
-		b := calculate(s)
-		switch b.(type) {
-		case int:
-			c.writer.WriteString(strconv.Itoa(b.(int)) + "\n")
-			c.writer.Flush()
-		case float64:
-			c.writer.WriteString(fmt.Sprintf("%.2f", b.(float64)) + "\n")
-			c.writer.Flush()
+		select {
+		case s := <-c.income:
+			// message received, let's the answer back to client
+			b := calculate(s)
+			switch b.(type) {
+			case int:
+				c.writer.WriteString(strconv.Itoa(b.(int)) + "\n")
+				c.writer.Flush()
+			case float64:
+				c.writer.WriteString(fmt.Sprintf("%.2f", b.(float64)) + "\n")
+				c.writer.Flush()
+			}
+			fmt.Println(b)
+		case <-c.disconnect:
+			c.conn.Close()
+			return
 		}
-		fmt.Println(b)
 	}
 }
 
@@ -102,7 +108,8 @@ func listen(c *client) {
 		// get string input from client
 		m, err := c.reader.ReadString('\n')
 		if err != nil {
-			log.Fatal(err, "on input messages")
+			c.disconnect <- "exit"
+			log.Fatal(err, " on input")
 		}
 		// no error, sending message to income channel
 		c.income <- m

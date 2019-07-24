@@ -18,15 +18,20 @@ func main() {
 	if err != nil {
 		log.Fatal(err, "on connection")
 	}
+
+	// close the connection after client is finished
+	defer conn.Close()
 	// create input / output (stream?) to server
 	output := bufio.NewWriter(conn)
 	input := bufio.NewReader(conn)
 
 	// create a go routine to check for incoming messages from server
-
 	go func() {
 		for {
-			i, _ := input.ReadString('\n')
+			i, err := input.ReadString('\n')
+			if err != nil {
+				panic(err)
+			}
 			i = strings.TrimRight(i, "\n")
 			fmt.Println(i)
 		}

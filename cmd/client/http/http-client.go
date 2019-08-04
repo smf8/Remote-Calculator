@@ -16,6 +16,7 @@ func main() {
 	r := bufio.NewReader(os.Stdin)
 	for s, _ := r.ReadString('\n'); s != "exit\n"; s, _ = r.ReadString('\n') {
 		s = strings.TrimRight(s, "\n")
+		s = strings.TrimSpace(s)
 		problem := model.NewProblem(s)
 		buf := bytes.NewBuffer(nil)
 		json.NewEncoder(buf).Encode(problem)

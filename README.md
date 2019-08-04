@@ -1,8 +1,11 @@
+
 # Remote-Calculator
 A Server/Client calculator with Golang 
 ## Usage
 **To run TCP client/server version:**
+
     go run cmd/server/main.go
+
 then run:
 
     go run cmd/client/main.go

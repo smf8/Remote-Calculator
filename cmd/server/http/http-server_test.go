@@ -1,11 +1,12 @@
 package main
 
 import (
-	"Remote-Calculator/pkg/model"
 	"bytes"
 	"encoding/json"
 	"net/http"
 	"testing"
+
+	"github.com/smf8/Remote-Calculator/pkg/model"
 )
 
 func BenchmarkCalculation(b *testing.B) {

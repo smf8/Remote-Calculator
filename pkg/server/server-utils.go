@@ -1,10 +1,11 @@
 package server
 
 import (
-	"Remote-Calculator/pkg/model"
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/smf8/Remote-Calculator/pkg/model"
 )
 
 //HandleProblem function to handle problems and calculate them

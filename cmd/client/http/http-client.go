@@ -1,7 +1,6 @@
 package main
 
 import (
-	"Remote-Calculator/pkg/model"
 	"bufio"
 	"bytes"
 	"encoding/json"
@@ -10,6 +9,8 @@ import (
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/smf8/Remote-Calculator/pkg/model"
 )
 
 func main() {

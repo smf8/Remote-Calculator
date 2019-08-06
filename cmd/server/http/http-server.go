@@ -1,9 +1,10 @@
 package main
 
 import (
-	"Remote-Calculator/pkg/server"
 	"log"
 	"net/http"
+
+	"github.com/smf8/Remote-Calculator/pkg/server"
 )
 
 func main() {

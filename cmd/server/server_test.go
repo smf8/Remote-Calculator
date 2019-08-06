@@ -3,9 +3,38 @@ package main
 import (
 	"bufio"
 	"net"
+	"strings"
 	"testing"
 )
 
+func BenchmarkCalculate(b *testing.B) {
+	var str strings.Builder
+	for i := 0; i < b.N; i++ {
+		str.Reset()
+		if (i % 4) == 0 {
+			// summation
+			str.WriteString(string(i))
+			str.WriteString("+")
+			str.WriteString(string(b.N - i))
+		} else if (i % 4) == 1 {
+			// substraction
+			str.WriteString(string(i))
+			str.WriteString("-")
+			str.WriteString(string(b.N - i))
+		} else if (i % 5) == 2 {
+			// multiplication
+			str.WriteString(string(i))
+			str.WriteString("*")
+			str.WriteString(string(b.N - i))
+		} else {
+			//division
+			str.WriteString(string(b.N - i))
+			str.WriteString("/")
+			str.WriteString(string(i))
+		}
+		calculate(str.String())
+	}
+}
 func TestCalculate(t *testing.T) {
 	add := "2  +3 "
 	sub := "4-1"

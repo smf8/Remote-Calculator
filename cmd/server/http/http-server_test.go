@@ -8,6 +8,30 @@ import (
 	"testing"
 )
 
+func BenchmarkCalculation(b *testing.B) {
+	for i := 1; i < b.N; i++ {
+		p := model.Problem{
+			FirstOperand:  float64(i),
+			SecondOperand: float64((b.N - i) / 3),
+		}
+		if p.SecondOperand == 0 {
+			p.SecondOperand = 1
+		}
+		switch i % 5 {
+		case 0:
+			p.Operator = "+"
+		case 1:
+			p.Operator = "-"
+		case 2:
+			p.Operator = "*"
+		case 3:
+			p.Operator = "/"
+		case 4:
+			p.Operator = "%"
+		}
+		p.Compute()
+	}
+}
 func TestServerSetup(t *testing.T) {
 	go main()
 	p := model.NewProblem("4+1.3")

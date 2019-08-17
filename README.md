@@ -1,4 +1,4 @@
-
+[![Build Status](https://cloud.drone.io/api/badges/smf8/Remote-Calculator/status.svg)](https://cloud.drone.io/smf8/Remote-Calculator)
 
 # Remote-Calculator
 A Server/Client calculator with Golang
